@@ -274,5 +274,120 @@ public class MCQApplication {
         }
     }
 
+	public static void viewAllQuestions() {
+    if (questions.isEmpty()) {
+        System.out.println("No questions available.");
+        return;
+    }
+
+    System.out.println("\nAll Questions:");
+    for (Question q : questions) {
+        displayQuestion(q);
+    }
+}
+public static void displayQuestion(Question q) {
+    System.out.println("\nID: " + q.getId());
+    System.out.println("Question: " + q.getQuestion());
+    System.out.println("Category: " + q.getCategory());
+    System.out.println("Difficulty: " + q.getDifficultyLevel());
+    System.out.println("Options:");
+    for (int i = 0; i < q.getOptions().length; i++) {
+        System.out.println((char)('A' + i) + ". " + q.getOptions()[i]);
+    }
+    System.out.println("Correct Answer: " + q.getCorrectOption());
+    System.out.println("Created: " + q.getCreatedAt());
+}
+public static void viewQuestionsByCategory(Scanner scanner) {
+    // Extract all unique categories
+    Set<String> categories = questions.stream()
+        .map(Question::getCategory)
+        .collect(Collectors.toSet());
+
+    // Display all available categories
+    System.out.println("Available categories:");
+    categories.forEach(System.out::println);
+
+    // Ask the user to input a category
+    System.out.print("Enter category: ");
+    String category = scanner.nextLine();
+
+    // Filter questions by the selected category
+    List<Question> filteredQuestions = questions.stream()
+        .filter(q -> q.getCategory().equalsIgnoreCase(category))
+        .collect(Collectors.toList());
+
+    // Display the results
+    if (filteredQuestions.isEmpty()) {
+        System.out.println("No questions found in category: " + category);
+    } else {
+        System.out.println("\nQuestions in category " + category + ":");
+        filteredQuestions.forEach(MCQApplication::displayQuestion);
+    }
+}
+
+
+public static void viewQuestionsByDifficulty(Scanner scanner) {
+    System.out.print("Enter difficulty level (Easy/Medium/Hard): ");
+    String difficulty = scanner.nextLine();
+
+    List<Question> filteredQuestions = questions.stream()
+        .filter(q -> q.getDifficultyLevel().equalsIgnoreCase(difficulty))
+        .collect(Collectors.toList());
+
+    if (filteredQuestions.isEmpty()) {
+        System.out.println("No questions found for difficulty: " + difficulty);
+    } else {
+        System.out.println("\nQuestions with difficulty " + difficulty + ":");
+        filteredQuestions.forEach(MCQApplication::displayQuestion);
+    }
+}
+public static void viewQuestionsByCategoryAndDifficulty(Scanner scanner) {
+    // Extract all unique categories
+    Set<String> categories = questions.stream()
+        .map(Question::getCategory)
+        .collect(Collectors.toSet());
+
+    // Extract all unique difficulty levels
+    Set<String> difficultyLevels = questions.stream()
+        .map(Question::getDifficultyLevel)
+        .collect(Collectors.toSet());
+
+    // Display all available categories
+    System.out.println("Available categories:");
+    categories.forEach(System.out::println);
+
+    // Display all available difficulty levels
+    System.out.println("\nAvailable difficulty levels (Easy/Medium/Hard):");
+    difficultyLevels.forEach(System.out::println);
+
+    // Prompt for category and difficulty level
+    System.out.print("Enter category: ");
+    String category = scanner.nextLine();
+
+    System.out.print("Enter difficulty level (Easy/Medium/Hard): ");
+    String difficulty = scanner.nextLine();
+
+    // Filter questions by both category and difficulty
+    List<Question> filteredQuestions = questions.stream()
+        .filter(q -> q.getCategory().equalsIgnoreCase(category) && q.getDifficultyLevel().equalsIgnoreCase(difficulty))
+        .collect(Collectors.toList());
+
+    // Check if filtered questions list is empty
+    if (filteredQuestions.isEmpty()) {
+        System.out.println("No questions found in category: " + category + " with difficulty: " + difficulty);
+    } else {
+        System.out.println("\nQuestions in category " + category + " with difficulty " + difficulty + ":");
+        filteredQuestions.forEach(MCQApplication::displayQuestion);
+    }
+}
+public static void viewRecentQuestions() {
+    System.out.println("\nMost Recent Questions (up to 10):");
+    questions.stream()
+        .sorted((q1, q2) -> q2.getCreatedAt().compareTo(q1.getCreatedAt()))
+        .limit(10)  // Only print 10 questions
+        .forEach(q -> System.out.println(q.getQuestion())); // Only print the question text
+}
+
+
 
 }

@@ -68,5 +68,112 @@ public class MCQApplicationTest {
             assertEquals("Easy", added.getDifficultyLevel());
         }
     }
+
+    @Nested
+class ViewQuestionsTests {
+    @BeforeEach
+    void setupQuestions() {
+        MCQApplication.questions.clear();
+        MCQApplication.questions.add(sampleQuestion);
+        String[] options = {"Option A", "Option B", "Option C", "Option D"};
+        MCQApplication.questions.add(new Question(
+            "Another Question?", 
+            options,
+            'B',
+            "Another Category",
+            "Medium"
+        ));
+    }
+
+    @Test
+    void testViewAllQuestionsWithNoQuestions() {
+        MCQApplication.questions.clear();
+        MCQApplication.viewAllQuestions();
+        assertTrue(outputStream.toString().contains("No questions available"));
+    }
+
+    @Test
+    void testViewAllQuestionsWithQuestions() {
+        MCQApplication.viewAllQuestions();
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test Question?"));
+        assertTrue(output.contains("Another Question?"));
+        assertTrue(output.contains("Test Category"));
+        assertTrue(output.contains("Another Category"));
+    }
+
+    @Test
+    void testViewQuestionsByCategoryAndDifficulty() {
+        Scanner scanner = new Scanner("Test Category\nEasy\n");
+        MCQApplication.viewQuestionsByCategoryAndDifficulty(scanner);
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test Question?"));
+        assertFalse(output.contains("Another Question?"));
+    }
+
+    @Test
+    void testViewQuestionsByCategoryAndDifficultyNoMatch() {
+        Scanner scanner = new Scanner("Test Category\nMedium\n");
+        MCQApplication.viewQuestionsByCategoryAndDifficulty(scanner);
+        String output = outputStream.toString();
+        assertTrue(output.contains("No questions found in category: Test Category with difficulty: Medium"));
+    }
+
+    @Test
+    void testDisplayQuestion() {
+        MCQApplication.displayQuestion(sampleQuestion);
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test Question?"));
+        assertTrue(output.contains("Option A"));
+        assertTrue(output.contains("Option B"));
+        assertTrue(output.contains("Option C"));
+        assertTrue(output.contains("Option D"));
+        assertTrue(output.contains("A"));
+        assertTrue(output.contains("Test Category"));
+        assertTrue(output.contains("Easy"));
+    }
+}
+
+@Nested
+class ViewQuestionsTests1 {
+    @BeforeEach
+    void setupQuestions() {
+        MCQApplication.questions.add(sampleQuestion);
+        String[] options = {"Option A", "Option B", "Option C", "Option D"};
+        MCQApplication.questions.add(new Question(
+            "Another Question?", 
+            options,
+            'B',
+            "Another Category",
+            "Medium"
+        ));
+    }
+
+    @Test
+    void testViewAllQuestions() {
+        MCQApplication.viewAllQuestions();
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test Question?"));
+        assertTrue(output.contains("Another Question?"));
+    }
+
+    @Test
+    void testViewQuestionsByCategory() {
+        Scanner scanner = new Scanner("Test Category\n");
+        MCQApplication.viewQuestionsByCategory(scanner);
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test Question?"));
+        assertFalse(output.contains("Another Question?"));
+    }
+
+    @Test
+    void testViewQuestionsByDifficulty() {
+        Scanner scanner = new Scanner("Easy\n");
+        MCQApplication.viewQuestionsByDifficulty(scanner);
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test Question?"));
+        assertFalse(output.contains("Another Question?"));
+    }
+}
     
 }
