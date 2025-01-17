@@ -142,4 +142,48 @@ public class MCQApplication {
 }
 
 
+private static void addQuestion(Scanner scanner) {
+    // Get the question text
+    System.out.print("Enter the question: ");
+    String questionText = scanner.nextLine();
 
+    // Get the options
+    String[] options = new String[4];
+    for (int i = 0; i < 4; i++) {
+        System.out.print("Enter option " + (char)('A' + i) + ": ");
+        options[i] = scanner.nextLine();
+    }
+
+    // Get the correct option
+    System.out.print("Enter the correct option (A/B/C/D): ");
+    String correctOptionInput = scanner.nextLine().toUpperCase();
+
+    if (correctOptionInput.length() != 1 || (correctOptionInput.charAt(0) < 'A' || correctOptionInput.charAt(0) > 'D')) {
+        System.out.println("Error: Invalid correct option. Please choose from A, B, C, or D.");
+        return;
+    }
+
+    char correctOption = correctOptionInput.charAt(0);
+
+    // Get the category
+    String category;
+
+    System.out.print("Enter category (cannot be empty): ");
+    category = scanner.nextLine().trim();
+
+    String difficultyLevel;
+
+    System.out.print("Enter difficulty level (Easy/Medium/Hard): ");
+    difficultyLevel = scanner.nextLine().trim();
+
+    // Save current state for undo
+    undoStack.push(new ArrayList < > (questions));
+
+    // Create and add the new question
+    Question newQuestion = new Question(questionText, options, correctOption, category, difficultyLevel);
+    questions.add(newQuestion);
+
+    logAction("ADD", "Added question: " + questionText);
+
+}
+}
