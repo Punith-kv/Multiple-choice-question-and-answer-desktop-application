@@ -175,5 +175,58 @@ class ViewQuestionsTests1 {
         assertFalse(output.contains("Another Question?"));
     }
 }
+
+@Nested
+class AuditLogTests {
+    @BeforeEach
+    void setup() {
+        MCQApplication.auditLogs.clear();
+    }
+
+    @Test
+    void testViewAuditLogEmpty() {
+        MCQApplication.viewAuditLog();
+        assertTrue(outputStream.toString().contains("No audit logs available"));
+    }
+
+    @Test
+    void testViewAuditLogWithEntries() {
+        MCQApplication.logAction("ADD", "Added test question");
+        MCQApplication.logAction("UPDATE", "Updated question ID-123");
+        MCQApplication.logAction("DELETE", "Deleted question ID-456");
+        
+        MCQApplication.viewAuditLog();
+        String output = outputStream.toString();
+        
+        assertTrue(output.contains("ADD: Added test question"));
+        assertTrue(output.contains("UPDATE: Updated question ID-123"));
+        assertTrue(output.contains("DELETE: Deleted question ID-456"));
+    }
+}
+@Nested
+class DatabaseResetTests {
+    @Test
+    void testDatabaseReset() {
+        MCQApplication.questions.add(sampleQuestion);
+        QuizAttempt attempt = new QuizAttempt("Test Category", "Easy");
+        MCQApplication.quizHistory.add(attempt);
+        
+        Scanner scanner = new Scanner("y\n");
+        MCQApplication.resetDatabase(scanner);
+        
+        assertTrue(MCQApplication.questions.isEmpty());
+        assertTrue(MCQApplication.quizHistory.isEmpty());
+    }
+
+    @Test
+    void testDatabaseResetCancellation() {
+        MCQApplication.questions.add(sampleQuestion);
+        
+        Scanner scanner = new Scanner("n\n");
+        MCQApplication.resetDatabase(scanner);
+        
+        assertEquals(1, MCQApplication.questions.size());
+    }
+}
     
 }
