@@ -228,5 +228,107 @@ class DatabaseResetTests {
         assertEquals(1, MCQApplication.questions.size());
     }
 }
+
+@Nested
+class UndoLastOperationTest {
+    @Test
+    void testUndoOperation() {
+        // Add a question
+        MCQApplication.Question question = new MCQApplication.Question(
+            "Test Question",
+            new String[]{"A1", "A2", "A3", "A4"},
+            'A',
+            "Test",
+            "Easy"
+        );
+        MCQApplication.questions.add(question);
+
+        // Delete the question
+        String input = question.getId().toString() + "\ny\n";
+        InputStream in = new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
+        Scanner scanner = new Scanner(System.in);
+        MCQApplication.deleteQuestion(scanner);
+
+        // Undo the deletion
+        MCQApplication.undoLastOperation();
+
+        assertEquals(1, MCQApplication.questions.size());
+        assertEquals("Test Question", MCQApplication.questions.get(0).getQuestion());
+    }
+    @Test
+    void undoForNoOperations() {
+        // Ensure the state is clean
+        MCQApplication.questions.clear();
+
+        // Call undoLastOperation with no prior operations
+        MCQApplication.undoLastOperation();
+
+        // Assert that the state remains unchanged
+        assertEquals(0, MCQApplication.questions.size());
+    }
+}
+@Nested
+class StatisticsTests {
+    @BeforeEach
+    void setup() {
+        MCQApplication.questions.clear();
+    }
+
+    @Test
+    void testViewStatisticsEmpty() {
+        MCQApplication.viewStatistics();
+        String output = outputStream.toString();
+        assertTrue(output.contains("Total Questions: 0"));
+    }
+
+    @Test
+    void testViewStatisticsWithVariedQuestions() {
+        // Add questions with different categories and difficulties
+        String[] options = {"A", "B", "C", "D"};
+        MCQApplication.questions.add(new Question("Q1", options, 'A', "Math", "Easy"));
+        MCQApplication.questions.add(new Question("Q2", options, 'B', "Math", "Medium"));
+        MCQApplication.questions.add(new Question("Q3", options, 'C', "Science", "Hard"));
+        
+        MCQApplication.viewStatistics();
+        String output = outputStream.toString();
+        
+        assertTrue(output.contains("Total Questions: 3"));
+        assertTrue(output.contains("Math: 2"));
+        assertTrue(output.contains("Science: 1"));
+        assertTrue(output.contains("Easy: 1"));
+        assertTrue(output.contains("Medium: 1"));
+        assertTrue(output.contains("Hard: 1"));
+    }
+}
+
+@Nested
+class StatisticsAndAuditTests {
+    @Test
+    void testViewStatistics() {
+        MCQApplication.questions.add(sampleQuestion);
+        
+        MCQApplication.viewStatistics();
+        
+        String output = outputStream.toString();
+        assertTrue(output.contains("Total Questions: 1"));
+        assertTrue(output.contains("Test Category: 1"));
+        assertTrue(output.contains("Easy: 1"));
+    }
+
+    @Test
+    void testAuditLogging() {
+        String input = "Test Question\nOption A\nOption B\nOption C\nOption D\nA\nTest Category\nEasy\n";
+        Scanner scanner = new Scanner(input);
+        
+        MCQApplication.addQuestion(scanner);
+        MCQApplication.viewAuditLog();
+        
+        String output = outputStream.toString();
+        assertTrue(output.contains("ADD"));
+        assertTrue(output.contains("Added question: Test Question"));
+    }
+}
+
     
 }
