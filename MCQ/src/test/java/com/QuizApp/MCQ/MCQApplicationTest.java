@@ -431,6 +431,38 @@ class StatisticsAndAuditTests {
             assertTrue(output.contains("Score: 0/1"));
         }
     }
+     class ValidInputTests {
+        @Test
+        void testGetValidIntInputValid() {
+            Scanner scanner = new Scanner("42\n");
+            int result = MCQApplication.getValidIntInput(scanner);
+            assertEquals(42, result);
+        }
+
+        @Test
+        void testGetValidIntInputInvalidThenValid() {
+            Scanner scanner = new Scanner("abc\n123\n");
+            int result = MCQApplication.getValidIntInput(scanner);
+            assertEquals(123, result);
+            assertTrue(outputStream.toString().contains("Please enter a valid number"));
+        }
+
+        @Test
+        void testGetValidIntInputNegativeNumber() {
+            Scanner scanner = new Scanner("-5\n");
+            int result = MCQApplication.getValidIntInput(scanner);
+            assertEquals(-5, result);
+        }
+
+        @Test
+        void testGetValidIntInputZero() {
+            Scanner scanner = new Scanner("0\n");
+            int result = MCQApplication.getValidIntInput(scanner);
+            assertEquals(0, result);
+        }
+    }
+    
+    
 
     
 }

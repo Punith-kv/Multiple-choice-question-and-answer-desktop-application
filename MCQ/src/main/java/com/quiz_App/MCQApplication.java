@@ -661,6 +661,17 @@ public static void viewQuizHistory() {
         System.out.println("Date: " + attempt.timestamp);
     }
 }
+ public static void logAction(String action, String details) {
+        auditLogs.add(new AuditLog(action, details));
+    }
+
+    public static int getValidIntInput(Scanner scanner) {
+        while (!scanner.hasNextInt()) {
+            System.out.println("Please enter a valid number.");
+            scanner.next();
+        }
+        return scanner.nextInt();
+    }
 
 
 
