@@ -475,5 +475,56 @@ public static void resetDatabase(Scanner scanner) {
     }
 }
 
+public static void loadData() {
+    try {
+        File dataFile = new File(DATA_FILE);
+        File auditFile = new File(AUDIT_FILE);
+        
+        if (dataFile.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dataFile))) {
+                questions = (List<Question>) ois.readObject();
+                quizHistory = (List<QuizAttempt>) ois.readObject();
+            }
+        }
+        
+        if (auditFile.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(auditFile))) {
+                auditLogs = (List<AuditLog>) ois.readObject();
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Error loading data: " + e.getMessage());
+    }
+}
+
+public static void saveData() {
+    try {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
+            oos.writeObject(questions);
+            oos.writeObject(quizHistory);
+        }
+        
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(AUDIT_FILE))) {
+            oos.writeObject(auditLogs);
+        }
+        
+        System.out.println("Data saved successfully.");
+    } catch (IOException e) {
+        System.out.println("Error saving data: " + e.getMessage());
+    }
+}
+
+public static void undoLastOperation() {
+    if (undoStack.isEmpty()) {
+        System.out.println("No operations to undo.");
+        return;
+    }
+
+    questions = undoStack.pop();
+    logAction("UNDO", "Undid last operation");
+    System.out.println("Last operation undone successfully.");
+}
+
+
 
 }
