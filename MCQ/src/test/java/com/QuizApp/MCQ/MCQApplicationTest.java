@@ -397,5 +397,40 @@ class StatisticsAndAuditTests {
     }
 }
 
+    @Nested
+    class QuizHistoryTests {
+        @BeforeEach
+        void setup() {
+            MCQApplication.quizHistory.clear();
+        }
+
+        @Test
+        void testViewQuizHistoryEmpty() {
+            MCQApplication.viewQuizHistory();
+            assertTrue(outputStream.toString().contains("No quiz history available"));
+        }
+
+        @Test
+        void testViewQuizHistoryWithAttempts() {
+            QuizAttempt attempt1 = new QuizAttempt("Test Category", "Easy");
+            attempt1.addAnswer(UUID.randomUUID(), 'A', true);
+            QuizAttempt attempt2 = new QuizAttempt("", ""); // All categories and difficulties
+            attempt2.addAnswer(UUID.randomUUID(), 'B', false);
+
+            MCQApplication.quizHistory.add(attempt1);
+            MCQApplication.quizHistory.add(attempt2);
+
+            MCQApplication.viewQuizHistory();
+            String output = outputStream.toString();
+
+            assertTrue(output.contains("Attempt 1"));
+            assertTrue(output.contains("Attempt 2"));
+            assertTrue(output.contains("Test Category"));
+            assertTrue(output.contains("All")); // For empty category/difficulty
+            assertTrue(output.contains("Score: 1/1"));
+            assertTrue(output.contains("Score: 0/1"));
+        }
+    }
+
     
 }
