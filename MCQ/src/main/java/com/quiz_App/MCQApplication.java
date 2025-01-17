@@ -643,6 +643,25 @@ public static void undoLastOperation() {
     System.out.println("Last operation undone successfully.");
 }
 
+public static void viewQuizHistory() {
+    if (quizHistory.isEmpty()) {
+        System.out.println("No quiz history available.");
+        return;
+    }
+
+    System.out.println("\nQuiz History:");
+    for (int i = 0; i < quizHistory.size(); i++) {
+        QuizAttempt attempt = quizHistory.get(i);
+        System.out.println("\nAttempt " + (i + 1) + ":");
+        System.out.println("Category: " +
+                (attempt.category.isEmpty() ? "All" : attempt.category));
+        System.out.println("Difficulty: " +
+                (attempt.difficultyLevel.isEmpty() ? "All" : attempt.difficultyLevel));
+        System.out.println("Score: " + attempt.getScore() + "/" + attempt.getAnswers().size());
+        System.out.println("Date: " + attempt.timestamp);
+    }
+}
+
 
 
 }
