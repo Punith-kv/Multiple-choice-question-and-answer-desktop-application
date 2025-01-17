@@ -672,6 +672,29 @@ public static void viewQuizHistory() {
         }
         return scanner.nextInt();
     }
+    public static void displayQuizSummary(QuizAttempt attempt) {
+        System.out.println("\nQuiz Summary:");
+        System.out.println("Score: " + attempt.getScore() + "/" + attempt.getAnswers().size());
+        System.out.println("Percentage: " + 
+                          (attempt.getScore() * 100.0 / attempt.getAnswers().size()) + "%");
+        
+        System.out.println("\nDetailed Answer Review:");
+        for (int i = 0; i < attempt.getAnswers().size(); i++) {
+            QuizAnswer answer = attempt.getAnswers().get(i);
+            Question question = questions.stream()
+                .filter(q -> q.getId().equals(answer.questionId))
+                .findFirst()
+                .orElse(null);
+            
+            if (question != null) {
+                System.out.println("\nQuestion " + (i + 1) + ": " + question.getQuestion());
+                System.out.println("Your answer: " + 
+                                 (answer.userAnswer == ' ' ? "Skipped" : answer.userAnswer));
+                System.out.println("Correct answer: " + question.getCorrectOption());
+                System.out.println("Result: " + (answer.correct ? "Correct" : "Incorrect"));
+            }
+        }
+    }
 
 
 

@@ -461,6 +461,46 @@ class StatisticsAndAuditTests {
             assertEquals(0, result);
         }
     }
+     @Nested
+     class QuizSummaryTests {
+         private QuizAttempt mockQuizAttempt;
+
+         @BeforeEach
+         void setup() {
+             mockQuizAttempt = new QuizAttempt("Test Category", "Easy");
+             MCQApplication.questions.clear();
+             MCQApplication.questions.add(sampleQuestion);
+         }
+
+         @Test
+         void testDisplayQuizSummaryPerfectScore() {
+             mockQuizAttempt.addAnswer(sampleQuestion.getId(), 'A', true);
+             MCQApplication.displayQuizSummary(mockQuizAttempt);
+             String output = outputStream.toString();
+             assertTrue(output.contains("Score: 1/1"));
+             assertTrue(output.contains("Percentage: 100.0%"));
+             assertTrue(output.contains("Correct"));
+         }
+
+         @Test
+         void testDisplayQuizSummaryZeroScore() {
+             mockQuizAttempt.addAnswer(sampleQuestion.getId(), 'B', false);
+             MCQApplication.displayQuizSummary(mockQuizAttempt);
+             String output = outputStream.toString();
+             assertTrue(output.contains("Score: 0/1"));
+             assertTrue(output.contains("Percentage: 0.0%"));
+             assertTrue(output.contains("Incorrect"));
+         }
+
+         @Test
+         void testDisplayQuizSummaryWithSkippedQuestion() {
+             mockQuizAttempt.addAnswer(sampleQuestion.getId(), ' ', false);
+             MCQApplication.displayQuizSummary(mockQuizAttempt);
+             String output = outputStream.toString();
+             assertTrue(output.contains("Your answer: Skipped"));
+         }
+     }
+
     
     
 
