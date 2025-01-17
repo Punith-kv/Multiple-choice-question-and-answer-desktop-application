@@ -389,6 +389,124 @@ public static void viewRecentQuestions() {
 }
 
 
+
+public static void takeQuiz(Scanner scanner, boolean retake) {
+    if (questions.isEmpty()) {
+        System.out.println("No questions available. Please add questions first.");
+        return;
+    }
+
+    final String selectedCategory;
+    final String selectedDifficulty;
+    List<Question> quizQuestions;
+
+    if (!retake) {
+        // Extract unique categories
+        Set<String> categories = questions.stream()
+            .map(Question::getCategory)
+            .collect(Collectors.toSet());
+
+        // Display available categories
+        System.out.println("\nAvailable Categories:");
+        categories.forEach(System.out::println);
+        System.out.println("Press Enter to include all categories.");
+
+        // Get user's choice
+        System.out.print("Enter category: ");
+        selectedCategory = scanner.nextLine();
+
+        System.out.print("Enter difficulty level (Easy/Medium/Hard, press Enter for all): ");
+        selectedDifficulty = scanner.nextLine();
+
+        quizQuestions = questions.stream()
+            .filter(q -> selectedCategory.isEmpty() || q.getCategory().equalsIgnoreCase(selectedCategory))
+            .filter(q -> selectedDifficulty.isEmpty() || q.getDifficultyLevel().equalsIgnoreCase(selectedDifficulty))
+            .collect(Collectors.toList());
+    } else {
+        if (quizHistory.isEmpty()) {
+            System.out.println("No previous quiz to retake.");
+            return;
+        }
+        QuizAttempt lastQuiz = quizHistory.get(quizHistory.size() - 1);
+        selectedCategory = lastQuiz.category;
+        selectedDifficulty = lastQuiz.difficultyLevel;
+        quizQuestions = new ArrayList<>(questions);
+    }
+
+    if (quizQuestions.isEmpty()) {
+        System.out.println("No questions available for selected criteria.");
+        return;
+    }
+
+    System.out.print("Enter number of questions (max " + quizQuestions.size() + "): ");
+    int numQuestions = getValidIntInput(scanner);
+    scanner.nextLine(); // Consume newline
+
+    // Check if the entered number exceeds available questions
+    if (numQuestions > quizQuestions.size()) {
+        System.out.println("Error: Only " + quizQuestions.size() + " questions are available selected category '"
+                + selectedCategory + "' and with selected difficulty '" + selectedDifficulty + "'.");
+        return; // Exit the quiz-taking process
+    }
+
+    Collections.shuffle(quizQuestions);
+    quizQuestions = quizQuestions.subList(0, numQuestions);
+
+    QuizAttempt attempt = new QuizAttempt(selectedCategory, selectedDifficulty);
+    int questionNum = 1;
+
+    System.out.println("\nInstructions: Enter A/B/C/D to answer, S to skip, or E to exit the quiz.");
+
+    for (Question question : quizQuestions) {
+        System.out.println("\nQuestion " + questionNum + "/" + numQuestions + ":");
+        System.out.println(question.getQuestion());
+
+        // Display options in their original order
+        for (int i = 0; i < 4; i++) {
+            System.out.println((char) ('A' + i) + ". " + question.getOptions()[i]);
+        }
+
+        System.out.print("Your answer (A/B/C/D, S to skip, E to exit): ");
+        String input = scanner.nextLine().toUpperCase();
+
+        if (input.equals("E")) {
+            System.out.println("\nExiting quiz... All remaining unanswered questions will be marked as incorrect.");
+            break;
+        } else if (input.equals("S")) {
+            attempt.addAnswer(question.getId(), ' ', false);
+            System.out.println("Question skipped.");
+        } else if (input.length() == 1 && input.charAt(0) >= 'A' && input.charAt(0) <= 'D') {
+            char userAnswer = input.charAt(0);
+            boolean correct = (userAnswer == question.getCorrectOption());
+
+            attempt.addAnswer(question.getId(), userAnswer, correct);
+
+            if (correct) {
+                System.out.println("Correct! Well done!");
+            } else {
+                System.out.println("Wrong. The correct answer was " + question.getCorrectOption() + ".");
+            }
+        } else {
+            System.out.println("Invalid input. Question marked as incorrect.");
+            attempt.addAnswer(question.getId(), ' ', false);
+        }
+        questionNum++;
+    }
+
+    // Mark all remaining questions as incorrect if user exits early
+    if (questionNum <= numQuestions) {
+        for (int i = questionNum - 1; i < numQuestions; i++) {
+            attempt.addAnswer(quizQuestions.get(i).getId(), ' ', false);
+        }
+    }
+
+    quizHistory.add(attempt);
+    System.out.println("\nQuiz completed!");
+    displayQuizSummary(attempt);
+}
+
+
+
 public static void importQuestions(Scanner scanner) {
     System.out.print("Enter file path to import questions from: ");
     String filePath = scanner.nextLine();
