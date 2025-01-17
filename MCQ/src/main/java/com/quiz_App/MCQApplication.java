@@ -389,5 +389,91 @@ public static void viewRecentQuestions() {
 }
 
 
+public static void importQuestions(Scanner scanner) {
+    System.out.print("Enter file path to import questions from: ");
+    String filePath = scanner.nextLine();
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        undoStack.push(new ArrayList<>(questions));
+        String line;
+        int imported = 0;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split("\\|");
+            if (parts.length >= 6) {
+                String questionText = parts[0];
+                String[] options = new String[4];
+                System.arraycopy(parts, 1, options, 0, 4);
+                char correctOption = parts[5].charAt(0);
+                String category = parts.length > 6 ? parts[6] : "General";
+                String difficulty = parts.length > 7 ? parts[7] : "Medium";
+
+                questions.add(new Question(questionText, options, correctOption, 
+                                        category, difficulty));
+                imported++;
+            }
+        }
+        logAction1("IMPORT", "Imported " + imported + " questions from " + filePath);
+        System.out.println("Successfully imported " + imported + " questions.");
+    } catch (IOException e) {
+        System.out.println("Error importing questions: " + e.getMessage());
+    }
+}
+
+
+public static void exportQuestions(Scanner scanner) {
+    System.out.print("Enter file path to export questions to: ");
+    String filePath = scanner.nextLine();
+
+    // Debug: Print the resolved file path
+    System.out.println("Exporting to: " + filePath);
+
+    // Ensure the parent directory exists
+    File file = new File(filePath);
+    File parentDir = file.getParentFile();
+    if (parentDir != null && !parentDir.exists()) {
+        System.out.println("The directory does not exist. Please provide a valid path.");
+        return;
+    }
+
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        for (Question q : questions) {
+            writer.write(q.getQuestion() + "|" + 
+                         String.join("|", q.getOptions()) + "|" +
+                         q.getCorrectOption() + "|" +
+                         q.getCategory() + "|" +
+                         q.getDifficultyLevel());
+            writer.newLine(); // For new line after each question
+        }
+        logAction1("EXPORT", "Exported " + questions.size() + " questions to " + filePath);
+        System.out.println("Successfully exported " + questions.size() + " questions.");
+    } catch (IOException e) {
+        System.out.println("Error exporting questions: " + e.getMessage());
+    }
+}
+
+public static void viewAuditLog() {
+    if (auditLogs.isEmpty()) {
+        System.out.println("No audit logs available.");
+        return;
+    }
+
+    System.out.println("\nAudit Log:");
+    auditLogs.forEach(log -> System.out.println(
+        log.timestamp + " - " + log.action + ": " + log.details));
+}
+
+public static void resetDatabase(Scanner scanner) {
+    System.out.print("Are you sure you want to reset the database? (y/n): ");
+    String confirm = scanner.nextLine();
+
+    if (confirm.equalsIgnoreCase("y")) {
+        undoStack.push(new ArrayList<>(questions));
+        questions.clear();
+        quizHistory.clear();
+        logAction1("RESET", "Database reset");
+        System.out.println("Database reset successfully.");
+    }
+}
+
 
 }
