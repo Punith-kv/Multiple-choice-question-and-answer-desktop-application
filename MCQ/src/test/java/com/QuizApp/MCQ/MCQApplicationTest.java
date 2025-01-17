@@ -4,8 +4,12 @@ package com.QuizApp.MCQ;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Scanner;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,6 +135,69 @@ class ViewQuestionsTests {
         assertTrue(output.contains("A"));
         assertTrue(output.contains("Test Category"));
         assertTrue(output.contains("Easy"));
+    }
+}
+
+@Nested
+class QuestionTests {
+
+    @Test
+    void testQuestionCreation() {
+        assertNotNull(sampleQuestion.getId());
+        assertEquals("Test Question?", sampleQuestion.getQuestion());
+        assertArrayEquals(
+                new String[]{"Option A", "Option B", "Option C", "Option D"},
+                sampleQuestion.getOptions()
+        );
+        assertEquals('A', sampleQuestion.getCorrectOption());
+        assertEquals("Test Category", sampleQuestion.getCategory());
+        assertEquals("Easy", sampleQuestion.getDifficultyLevel());
+        assertNotNull(sampleQuestion.getCreatedAt());
+    }
+
+    @Test
+    void testQuestionSetters() {
+        sampleQuestion.setQuestion("Updated Question");
+        assertEquals("Updated Question", sampleQuestion.getQuestion());
+
+        String[] newOptions = {"New A", "New B", "New C", "New D"};
+        sampleQuestion.setOptions(newOptions);
+        assertArrayEquals(newOptions, sampleQuestion.getOptions());
+
+        sampleQuestion.setCorrectOption('B');
+        assertEquals('B', sampleQuestion.getCorrectOption());
+
+        sampleQuestion.setCategory("New Category");
+        assertEquals("New Category", sampleQuestion.getCategory());
+
+        sampleQuestion.setDifficultyLevel("Hard");
+        assertEquals("Hard", sampleQuestion.getDifficultyLevel());
+    }
+}
+// QuizAttempt Class Tests
+@Nested
+class QuizAttemptTests {
+    @Test
+    void testQuizAttemptCreation() {
+        QuizAttempt attempt = new QuizAttempt("Test Category", "Easy");
+        assertEquals(0, attempt.getScore());
+        assertTrue(attempt.getAnswers().isEmpty());
+    }
+
+    @Test
+    void testAddAnswer() {
+        QuizAttempt attempt = new QuizAttempt("Test Category", "Easy");
+        UUID questionId = UUID.randomUUID();
+        
+        // Test correct answer
+        attempt.addAnswer(questionId, 'A', true);
+        assertEquals(1, attempt.getScore());
+        assertEquals(1, attempt.getAnswers().size());
+        
+        // Test incorrect answer
+        attempt.addAnswer(questionId, 'B', false);
+        assertEquals(1, attempt.getScore());
+        assertEquals(2, attempt.getAnswers().size());
     }
 }
 
